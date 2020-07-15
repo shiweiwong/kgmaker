@@ -206,6 +206,11 @@ public interface IKGGraphService {
 	 * @param status
 	 */
 	void batchInsertByCSV(String domain, String csvUrl, int status) ;
+
+	/**
+	 * 通过 csv 批量添加属性
+	 */
+	void batchSetPropertyByCSV(String domain, String csvUrl, int status);
 	/**
 	 * 更新节点有无附件
 	 * @param domain

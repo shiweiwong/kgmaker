@@ -232,4 +232,6 @@ public interface IKGraphRepository {
 	 * 保存节点属性
 	 */
 	StatementResult saveProperties(String label, String id, Map<String, Object> properties);
+
+	void batchSetPropertyByCSV(String domain, String csvUrl, int status);
 }

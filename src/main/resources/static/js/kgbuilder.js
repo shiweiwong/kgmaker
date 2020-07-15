@@ -53,6 +53,7 @@
         nodeimagelist: [],
         netimageurl: '',
         dialogimageVisible: false,
+        propertyFormVisible: false,
         dialogImageUrl: '',
         showImageList: [],
         editorcontent: '',
@@ -92,6 +93,7 @@
         exportFormVisible: false,
         headers: {},
         uploadurl: contextRoot + "importgraph",
+        propertyurl: contextRoot +"importproperty",
         currentDomain:"无",
     },
     filters: {
@@ -1422,9 +1424,15 @@
             }
             if (command === 'import') {
                 this.dialogFormVisible = true;
+                this.uploadparam.domain = this.currentDomain;
             }
             if (command === 'export') {
                 this.exportFormVisible = true;
+                this.uploadparam.domain = this.currentDomain;
+            }
+            if (command === 'property'){
+                this.propertyFormVisible = true;
+                this.uploadparam.domain = this.currentDomain;
             }
         },
         exportcsv() {
@@ -1445,13 +1453,27 @@
             this.$refs.upload.submit();
             this.dialogFormVisible = false;
         },
+        propertyUpload(){
+    	    this.$refs.propertyupload.submit();
+    	    this.propertyFormVisible = false;
+        },
         csvsuccess() {
             this.$refs.upload.clearFiles();
             this.uploadparam.domain = "";
             this.$message({
-                message: "正在导入中,请稍后查看",
+                message: "导入成功，请刷新查看",
                 type: 'success'
             });
+            this.updategraph();
+        },
+        propertysucces(){
+    	    this.$refs.propertyupload.clearFiles();
+            this.uploadparam.domain = "";
+            this.$message({
+                message:"导入成功，请刷新查看",
+                type: 'success'
+            })
+            this.updategraph();
         },
         exportimage() {
             /*https://html2canvas.hertzen.com/getting-started  截图js*/
@@ -1462,6 +1484,14 @@
                 a.download = timestamp;  //设定下载名称
                 a.click(); //点击触发下载
             });
+        },
+        querySearchAsync(queryString, callback) {
+            var list = [{}];
+            for(var it in this.pageModel.nodeList){
+                list.push({"value": it.name});
+            }
+            callback(list);
+
         },
         setmatchsize(m, event) {
             for (var i = 0; i < this.pagesizelist.length; i++) {

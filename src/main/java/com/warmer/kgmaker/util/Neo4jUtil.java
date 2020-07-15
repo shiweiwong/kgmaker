@@ -33,7 +33,6 @@ public class Neo4jUtil {
 		try (Session session = neo4jDriver.session()) {
 			System.out.println(cypherSql);
 			result = session.run(cypherSql);
-			session.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

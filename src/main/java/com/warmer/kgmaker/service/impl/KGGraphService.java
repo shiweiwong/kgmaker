@@ -139,6 +139,10 @@ public class KGGraphService implements IKGGraphService {
 		kgRepository.batchInsertByCSV(domain, csvUrl, status);
 	}
 
-	
+    @Override
+    public void batchSetPropertyByCSV(String domain, String csvUrl, int status) {
+        kgRepository.batchSetPropertyByCSV(domain, csvUrl, status);
+    }
+
 
 }

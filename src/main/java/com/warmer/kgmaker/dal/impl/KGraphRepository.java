@@ -714,4 +714,14 @@ public class KGraphRepository implements IKGraphRepository {
 		cypher.append(String.join(",",propertiesString));
 		return neo4jUtil.excuteCypherSql(cypher.toString());
 	}
+
+	@Override
+	public void batchSetPropertyByCSV(String domain, String csvUrl, int status) {
+		String addIndexCypher = "CREATE INDEX ON :" + domain +"(name)";
+		String addPropertyCypher = "USING PERIODIC COMMIT 500 LOAD CSV FROM '" + csvUrl +"' AS line" +
+								" MATCH (n:`"+ domain+"`) WHERE n.name=line[0] SET n+={linfe[1]:line[2]}";
+
+		neo4jUtil.excuteCypherSql(addIndexCypher);
+		neo4jUtil.excuteCypherSql(addPropertyCypher);
+	}
 }

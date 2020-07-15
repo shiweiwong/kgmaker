@@ -18,6 +18,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.Session;
+import org.neo4j.driver.v1.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,7 +44,8 @@ public class KGManagerController extends BaseController {
 	private IKGGraphService KGGraphService;
 	@Autowired
 	private IKnowledgegraphService kgservice;
-
+	@Autowired
+	private Driver neo4jDriver;
 	@GetMapping("/")
 	public String home(Model model) {
 		return "kg/home";
@@ -62,6 +66,7 @@ public class KGManagerController extends BaseController {
 				result.setMsg("保存成功");
 			}else{
 				result.code = 400;
+				result.msg = "属性值错误";
 				result.msg = "属性值错误";
 			}
 
@@ -431,7 +436,75 @@ public class KGManagerController extends BaseController {
 		}
 		return result;
 	}
+	@ResponseBody
+	@RequestMapping(value = "/importproperty")
+	public JSONObject importProperty(@RequestParam(value = "file", required = true) MultipartFile file, HttpServletRequest request){
+		JSONObject res = new JSONObject();
+		if(file == null){
+			res.put("code", "500");
+			res.put("msg", "请先选择有效的文件");
+			return res;
+		}
+		String label = request.getParameter("domain");
+		if(StringUtil.isBlank(label)){
+			res.put("code", "500");
+			res.put("msg", "请先选择领域");
+			return res;
+		}
+		List<Map<String, Object>> dataList = new LinkedList<>();
+		if(!file.getOriginalFilename().endsWith(".csv")){
+			res.put("code", "500");
+			res.put("msg", "请选择csv文件");
+		}
+		List<List<String>> list = CSVUtil.readCsvFile(file);
+		for (int i = 0; i < list.size(); i++) {
+			List<String> lst = list.get(i);
+			if (lst.size() != 3) continue;
+			String node = lst.get(0);
+			String property = lst.get(1);
+			String value = lst.get(2);
+			if (StringUtil.isBlank(new String[]{node, property, value})) {
+				continue;
+			}
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("node", node);
+			map.put("property", property);
+			map.put("value", value);
+			dataList.add(map);
+		}
+		try {
+			List<List<String>> targetList = new ArrayList<>();
+			for (Map<String, Object> item : dataList) {
+				List<String> lst = new ArrayList<>();
+				lst.add(item.get("node").toString());
+				lst.add(item.get("property").toString());
+				lst.add(item.get("value").toString());
+				targetList.add(lst);
+				log.error(Arrays.toString(lst.toArray()));
+			}
+			try(Session session = neo4jDriver.session()){
+				Transaction tx = session.beginTransaction();
 
+				for(List<String> it: targetList){
+					tx.run("MATCH (n:" + label+") WHERE n.name='"+it.get(0)+"' SET n."+it.get(1)+"='"+it.get(2)+"'");
+				}
+				tx.success();
+
+			}catch (Exception e){
+				e.printStackTrace();
+				res.put("code", "500");
+				res.put("msg", "服务器错误");
+				return res;
+			}
+			res.put("code", 200);
+			res.put("message", "success!");
+			return res;
+		} catch (Exception e) {
+			res.put("code", 500);
+			res.put("message", "服务器错误!");
+		}
+		return res;
+	}
 	@ResponseBody
 	@RequestMapping(value = "/importgraph")
 	public JSONObject importgraph(@RequestParam(value = "file", required = true) MultipartFile file,
@@ -457,8 +530,8 @@ public class KGManagerController extends BaseController {
 				lst.add(item.get("sourcenode").toString());
 				lst.add(item.get("targetnode").toString());
 				lst.add(item.get("relationship").toString());
-				lst.add(item.get("property").toString());
-				lst.add(item.get("root").toString());
+//				lst.add(item.get("property").toString());
+//				lst.add(item.get("root").toString());
 				list.add(lst);
 				log.error(Arrays.toString(lst.toArray()));
 			}
@@ -523,20 +596,23 @@ public class KGManagerController extends BaseController {
 				List<List<String>> list = CSVUtil.readCsvFile(file);
 				for (int i = 0; i < list.size(); i++) {
 					List<String> lst = list.get(i);
-//					if (lst.size() != 3) continue;
+					if (lst.size() != 3) continue;
 					String sourceNode = lst.get(0);
 					String targetNode = lst.get(1);
 					String relationShip = lst.get(2);
-					String property = lst.get(3);
-					String isRoot = lst.get(4);
-					if (StringUtil.isBlank(sourceNode) || StringUtils.isBlank(targetNode) || StringUtils.isBlank(relationShip)||StringUtil.isBlank(property))
+//					String property = lst.get(3);
+//					String isRoot = lst.get(4);
+					if(StringUtil.isBlank(new String[]{sourceNode, targetNode, relationShip})){
 						continue;
+					}
+//					if (StringUtil.isBlank(sourceNode) || StringUtils.isBlank(targetNode) || StringUtils.isBlank(relationShip)||StringUtil.isBlank(property))
+//						continue;
 					Map<String, Object> map = new HashMap<String, Object>();
 					map.put("sourcenode", sourceNode);
 					map.put("targetnode", targetNode);
 					map.put("relationship", relationShip);
-					map.put("property", property);
-					map.put("root", isRoot);
+//					map.put("property", property);
+//					map.put("root", isRoot);
 					mapList.add(map);
 				}
 			}

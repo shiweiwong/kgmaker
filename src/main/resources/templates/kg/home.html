@@ -182,7 +182,8 @@ left: 812px !important;
 		  </el-button>
 		  <el-dropdown-menu slot="dropdown">
 			  <el-dropdown-item command="image">导出图片</el-dropdown-item>
-			  <el-dropdown-item command="import">导入</el-dropdown-item>
+			  <el-dropdown-item command="import">导入图谱</el-dropdown-item>
+			  <el-dropdown-item command="property">导入属性</el-dropdown-item>
 			  <el-dropdown-item command="export">导出</el-dropdown-item>
 		  </el-dropdown-menu>
 		</el-dropdown>
@@ -215,9 +216,9 @@ left: 812px !important;
 			  <el-form >
 				  <div><span>注意字符集为utf-8无bom格式，三元组结构：节点-节点-关系</span></div>
 			    <el-form-item label="图谱领域" label-width="120px">
-			      <el-autocomplete style="width:100%"
-				      v-model="uploadparam.domain" placeholder="请输入内容"><!--:fetch-suggestions="querySearch"-->
-				  </el-autocomplete>
+			      <el-input style="width:100%"
+								   v-model="uploadparam.domain" :placeholder="currentDomain"><!--:fetch-suggestions="querySearch"-->
+				  </el-input>
 			    </el-form-item>
 			    <el-form-item label="选择文件" label-width="120px">
 				      <el-upload
@@ -244,12 +245,45 @@ left: 812px !important;
 			    <el-button type="primary" @click="submitUpload">确 定</el-button>
 			  </div>
 			</el-dialog>
+		<el-dialog title="csv导入属性" :visible.sync="propertyFormVisible" width="30%">
+			<el-form >
+				<div><span>注意字符集为utf-8无bom格式，三元组结构：节点名,属性名,属性值</span></div>
+				<el-form-item label="图谱领域" label-width="120px">
+					<el-input style="width:100%"
+									 v-model="uploadparam.domain" :placeholder="currentDomain"><!--:fetch-suggestions="querySearch"-->
+					</el-input>
+				</el-form-item>
+				<el-form-item label="选择文件" label-width="120px">
+					<el-upload
+							class=""
+							:headers="headers"
+							ref="propertyupload"
+							:action="propertyurl"
+							accept=".csv"
+							:show-file-list="true"
+							:data="uploadparam"
+							:on-success="propertysucces"
+							:auto-upload="false">
+						<el-button  slot="trigger" class="btn-bo" style="padding: 12px 24px;margin-bottom: 0px;" >
+							<svg class="icon" aria-hidden="true">
+								<use xlink:href="#icon-daoru"></use>
+							</svg>
+							选择文件
+						</el-button>
+					</el-upload>
+				</el-form-item>
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click="propertyFormVisible = false">取 消</el-button>
+				<el-button type="primary" @click="propertyUpload">确 定</el-button>
+			</div>
+		</el-dialog>
 		<el-dialog title="导出图谱csv" :visible.sync="exportFormVisible" width="30%">
 			  <el-form >
 			    <el-form-item label="图谱领域" label-width="120px">
-			      <el-autocomplete style="width:100%"
-				      v-model="uploadparam.domain" placeholder="请输入内容"><!--:fetch-suggestions="querySearch"-->
-				  </el-autocomplete>
+			      <el-input style="width:100%"
+				      v-model="uploadparam.domain" :placeholder="currentDomain"><!--:fetch-suggestions="querySearch"-->
+				  </el-input>
 			    </el-form-item>
 			    <el-button type="primary" @click="exportcsv">确 定</el-button>
 				  </el-form >

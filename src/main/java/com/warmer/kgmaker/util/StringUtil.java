@@ -25,6 +25,15 @@ public class StringUtil {
         return true;
     }
 
+    public static boolean isBlank(String[] str){
+        for(String it: str){
+            if (isBlank(it)){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean isNotBlank(String str){
         return !isBlank(str);
     }
