@@ -469,7 +469,7 @@ public class KGManagerController extends BaseController {
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("node", node);
 			map.put("property", property);
-			map.put("value", value);
+			map.put("value", value.replace('\\','/'));
 			dataList.add(map);
 		}
 		try {

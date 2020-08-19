@@ -637,9 +637,9 @@ public class KGraphRepository implements IKGraphRepository {
 		String addIndexCypher = null;
 		addIndexCypher = " CREATE INDEX ON :" + domain + "(name);";
 		loadNodeCypher1 = " USING PERIODIC COMMIT 500 LOAD CSV FROM '" + csvUrl + "' AS line " + " MERGE (:`" + domain
-				+ "` {name:line[0],root:toBoolean(line[4])});";
+				+ "` {name:line[0]});";
 		loadNodeCypher2 = " USING PERIODIC COMMIT 500 LOAD CSV FROM '" + csvUrl + "' AS line " + " MERGE (:`" + domain
-				+ "` {name:line[1],path:line[3]});";
+				+ "` {name:line[1]});";
 		// 拼接生产关系导入cypher
 		String loadRelCypher = null;
 		String type = "RE";
